@@ -69,7 +69,7 @@ function App() {
     const msg = formatAuthMessage(address, chainId);
     const sig = await provider.send("personal_sign", [msg, address]);
     console.log("Signature", sig);
-    console.log("isValid", utils.verifyMessage(msg, sig) === address);
+    console.log("isValid", utils.verifyMessage(msg, sig) === utils.getAddress(address));
   }
 
   async function transferDai() {
