@@ -56,6 +56,16 @@ function App() {
   const [address, setAddress] = React.useState<string>("");
   const [provider, setProvider] = React.useState<providers.Web3Provider>();
 
+  function accountsChanged(accounts: string[]) {
+    console.log("accountsChanged", accounts);
+    setAddress(accounts[0]);
+  }
+
+  function chainChanged(chainId: number) {
+    console.log("chainChanged", chainId);
+    setChainId(chainId);
+  }
+
   function reset() {
     console.log("reset");
     setChainId(1);
@@ -69,7 +79,9 @@ function App() {
       throw new Error("Missing Infura Id");
     }
     const web3Provider = await web3Modal.connect();
-
+    
+    web3Provider.on("accountsChanged", accountsChanged);
+    web3Provider.on("chainChanged", chainChanged);
     web3Provider.on("disconnect", reset);
 
     const accounts = (await web3Provider.enable()) as string[];
@@ -102,7 +114,7 @@ function App() {
     const msg = formatAuthMessage(address, chainId);
     const sig = await provider.send("personal_sign", [msg, address]);
     console.log("Signature", sig);
-    console.log("isValid", utils.verifyMessage(msg, sig) === address);
+    console.log("isValid", utils.verifyMessage(msg, sig) === utils.getAddress(address));
   }
 
   async function transferDai() {
