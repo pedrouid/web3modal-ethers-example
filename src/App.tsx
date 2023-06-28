@@ -39,6 +39,10 @@ const CHAINS: Chains = {
 };
 
 function App() {
+  if (!process.env.REACT_APP_WC_PROJECT_ID) {
+    throw new Error("Missing WalletConnect Project Id");
+  }
+
   const web3Modal = new Web3Modal({
     network: "mainnet",
     cacheProvider: true,
@@ -46,7 +50,9 @@ function App() {
       walletconnect: {
         package: WalletConnectProvider,
         options: {
-          infuraId: process.env.REACT_APP_INFURA_ID,
+          projectId: process.env.REACT_APP_WC_PROJECT_ID,
+          chains: [1],
+          showQrCode: true,
         },
       },
     },
@@ -79,7 +85,7 @@ function App() {
       throw new Error("Missing Infura Id");
     }
     const web3Provider = await web3Modal.connect();
-    
+
     web3Provider.on("accountsChanged", accountsChanged);
     web3Provider.on("chainChanged", chainChanged);
     web3Provider.on("disconnect", reset);
@@ -114,7 +120,10 @@ function App() {
     const msg = formatAuthMessage(address, chainId);
     const sig = await provider.send("personal_sign", [msg, address]);
     console.log("Signature", sig);
-    console.log("isValid", utils.verifyMessage(msg, sig) === utils.getAddress(address));
+    console.log(
+      "isValid",
+      utils.verifyMessage(msg, sig) === utils.getAddress(address)
+    );
   }
 
   async function transferDai() {
